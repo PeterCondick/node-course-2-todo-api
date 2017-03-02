@@ -11,7 +11,9 @@ const todos = [{
   text: 'first'
 }, {
   _id: new ObjectID(),
-  text: 'second'
+  text: 'second',
+  completed: true,
+  completedAt: 333
 }];
 
 beforeEach((done) => {
@@ -145,4 +147,75 @@ describe('DELETE /todos/:id', () => {
       .expect(404)
       .end(done);
   });
+});
+
+describe('PATCH /todos/:id', () => {
+  it('should update a todo', (done) => {
+    // grab id of first item
+    // update text, set completed = true
+    // 200
+    // text changed, completed = true, completedAt = number
+    var hexId = todos[0]._id.toHexString();
+
+    var text = 'qweupd';
+    var completed = true;
+
+    request(app)
+      .patch(`/todos/${hexId}`)
+      .send({text, completed})
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo._id).toBe(hexId);
+      })
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        // query db using findById - should exist
+        // expect(todo).toNotExist();
+        Todo.findById(hexId).then((todo) => {
+          expect(todo).toExist();
+          expect(todo.text).toExist().toEqual(text);
+          expect(todo.completed).toExist().toEqual(completed);
+          expect(todo.completedAt).toExist().toBeA('number');
+          done();
+        }).catch((e) => done(e));
+
+      });
+  });
+
+  it('should clear completedAt when todo not completed', (done) => {
+    // grab id of second item
+    // update text, set completed = false
+    // 200
+    // text changed, completed = false, completedAt = null (toNotExist)
+    var hexId = todos[1]._id.toHexString();
+
+    var text = 'zzz';
+    var completed = false;
+
+    request(app)
+      .patch(`/todos/${hexId}`)
+      .send({text, completed})
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo._id).toBe(hexId);
+      })
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        // query db using findById - should exist
+        // expect(todo).toNotExist();
+        Todo.findById(hexId).then((todo) => {
+          expect(todo).toExist();
+          expect(todo.text).toExist().toEqual(text);
+          expect(todo.completed).toEqual(completed);
+          expect(todo.completedAt).toNotExist();
+          done();
+        }).catch((e) => done(e));
+
+      });
+  });
+
 });
