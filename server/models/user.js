@@ -83,7 +83,7 @@ UserSchema.pre('save', function (next) {
     bcrypt.genSalt(10, (err, salt) => {
       bcrypt.hash(user.password, salt, (err, hash) => {
         user.password = hash;
-        console.log('is modified - setting password to ' + hash);
+        //console.log('is modified - setting password to ' + hash);
         next();
       });
     });
@@ -91,7 +91,7 @@ UserSchema.pre('save', function (next) {
     // user.password = hash;
     // next();
   } else {
-    console.log('not modified - leaving password as ' + user.password);
+    //console.log('not modified - leaving password as ' + user.password);
     next();
   }
 });
