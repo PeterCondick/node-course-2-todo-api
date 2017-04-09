@@ -360,7 +360,30 @@ describe('POST /users/login', () => {
           expect(user.tokens.length).toBe(0);
           done();
         }).catch((e) => done(e));
-      })
+      });
   });
 
+});
+
+describe('DELETE /users/me/token', () => {
+  it('should remove auth token on logout', (done) => {
+    // Delete /users/me/token
+    request(app)
+      .delete('/users/me/token')
+    // set x-auth = token for user i
+    .set('x-auth', users[0].tokens[0].token)
+    // 200
+    .expect(200)
+    // find user - verify tokens array length = 0
+    .end((err, res) => {
+      if (err) {
+        return done(err);
+      }
+
+      User.findById(users[0]._id).then((user) => {
+        expect(user.tokens.length).toBe(0);
+        done();
+      }).catch((e) => done(e));
+    });
+  });
 });
